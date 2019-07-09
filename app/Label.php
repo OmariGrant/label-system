@@ -10,4 +10,14 @@ class Label extends Model
     protected $fillable = [
         'id', 'Name', 'Slug', 'Path', 'TextColour', 'BGColour', 'created_at', 'updated_at'
     ];
+
+    public function parent()
+    {
+        return $this->belongsTo('Label');
+    }
+
+    public function children()
+    {
+        return $this->hasMany('Label');
+    }
 }

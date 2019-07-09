@@ -36,6 +36,7 @@ class LabelController extends Controller
     public function create()
     {
         //
+        return view('label.form');
     }
 
     /**
@@ -47,10 +48,24 @@ class LabelController extends Controller
     public function store(Request $request)
     {
         //
+        $label = new Label();
+        $label->Name = $request->Name;
+        $label->Slug = $request->Slug;
+        $label->Path = $request->Path;
+        $label->TextColour = $request->TextColour;
+        $label->BGColour = $request->BGColour;
+        $label->save();
+
+        return response()->json('
+        {"status":"success",
+        "data":'.$label.'
+        ,"code":"200"}
+        ');
+
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified resource.po
      *
      * @param  \App\Label  $label
      * @return \Illuminate\Http\Response
