@@ -2,13 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreLabel;
 use App\Label;
 use App\Http\Resources\LabelCollection as LabelCollection;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Arr;
 
 class LabelController extends Controller
 {
+
+    public function __construct()
+    {
+//        $this->middleware('auth');
+//        $this->middleware('api');
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -19,13 +28,22 @@ class LabelController extends Controller
         //
         $labelData = new LabelCollection(Label::all());
 
-        $arrayData = [
-          'status' => 'success',
-          'data' => $labelData,
-          'code' => '200'
-        ];
 
-        return json_encode($arrayData);
+        if ($labelData->response()->getStatusCode() == 200)
+        {
+            return response()->json([
+                'status' => 'success',
+                'data' => $labelData,
+                'code' => $labelData->response()->getStatusCode(),
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'code' => $labelData->response()->getStatusCode(),
+                'message' => $labelData,
+            ]);
+        }
+
     }
 
     /**
@@ -45,9 +63,12 @@ class LabelController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreLabel $request)
     {
         //
+
+        $validated = $request->validated();
+
         $label = new Label();
         $label->Name = $request->Name;
         $label->Slug = $request->Slug;
@@ -56,11 +77,11 @@ class LabelController extends Controller
         $label->BGColour = $request->BGColour;
         $label->save();
 
-        return response()->json('
-        {"status":"success",
-        "data":'.$label.'
-        ,"code":"200"}
-        ');
+        return response()->json([
+            'status' => 'success',
+            'data' => $label,
+            'code' => 200,
+        ]);
 
     }
 
@@ -73,6 +94,16 @@ class LabelController extends Controller
     public function show(Label $label)
     {
         //
+
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'current' => $label,
+                'children' => $label->children->Path
+            ],
+            'code' => 200,
+        ]);
     }
 
     /**
@@ -84,6 +115,17 @@ class LabelController extends Controller
     public function edit(Label $label)
     {
         //
+        $data = [
+            'isEdit' => 1,
+            'Name' => $label->Name,
+            'Slug' => $label->Slug,
+            'Path' => $label->Path,
+            'TextColour' => $label->TextColour,
+            'BGColour' => $label->BGColour,
+        ];
+
+        return view('label.form', $data);
+
     }
 
     /**
@@ -96,6 +138,18 @@ class LabelController extends Controller
     public function update(Request $request, Label $label)
     {
         //
+        $label->Name = $request->Name;
+        $label->Slug = $request->Slug;
+        $label->Path = $request->Path;
+        $label->TextColour = $request->TextColour;
+        $label->BGColour = $request->BGColour;
+        $label->save();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $label,
+            'code' => 200,
+        ]);
     }
 
     /**
@@ -107,5 +161,12 @@ class LabelController extends Controller
     public function destroy(Label $label)
     {
         //
+        $label->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $label,
+            'code' => 200,
+        ]);
     }
 }

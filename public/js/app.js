@@ -1920,12 +1920,17 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "Form",
   data: function data() {
     return {
       labelInput: {},
-      errors: {}
+      errors: {},
+      //get csrf from blade view
+      csrf: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
     };
   },
   methods: {
@@ -1934,10 +1939,18 @@ __webpack_require__.r(__webpack_exports__);
 
       this.errors = {};
       axios.post('/labels', this.labelInput).then(function (response) {
-        alert('Message sent!');
+        alert('Label added');
+        console.log(response);
       })["catch"](function (error) {
         if (error.response.status === 422) {
           _this.errors = error.response.data.errors || {};
+        }
+
+        console.log(_this.errors);
+
+        if (_this.errors.Path !== undefined) {
+          console.log(_this.errors.Path[0]);
+          alert(_this.errors.Path[0] + 'Please try a new Path.');
         }
       });
     }
@@ -38789,6 +38802,11 @@ var render = function() {
       }
     },
     [
+      _c("input", {
+        attrs: { type: "hidden", name: "_token" },
+        domProps: { value: _vm.csrf }
+      }),
+      _vm._v(" "),
       _c("div", { staticClass: "form-group" }, [
         _c("label", { attrs: { for: "Name" } }, [_vm._v("Name")]),
         _vm._v(" "),

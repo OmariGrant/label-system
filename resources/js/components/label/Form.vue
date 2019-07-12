@@ -1,5 +1,8 @@
 <template>
     <form @submit.prevent="submit">
+        <!--input csrf-->
+        <input type="hidden" name="_token" :value="csrf">
+
         <div class="form-group">
             <label for="Name">Name</label>
             <input type="text" class="form-control" name="Name" id="Name" v-model="labelInput.Name" />
@@ -32,17 +35,27 @@
             return {
                 labelInput: {},
                 errors: {},
+                //get csrf from blade view
+                csrf: document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
             }
         },
         methods: {
             submit() {
                 this.errors = {};
                 axios.post('/labels', this.labelInput).then(response => {
-                    alert('Message sent!');
+                    alert('Label added');
+                    console.log(response);
                 }).catch(error => {
                     if (error.response.status === 422) {
                         this.errors = error.response.data.errors || {};
                     }
+                    console.log(this.errors);
+                    if (this.errors.Path !== undefined)
+                    {
+                        console.log(this.errors.Path[0]);
+                        alert(this.errors.Path[0] + 'Please try a new Path.');
+                    }
+
                 });
             },
         },
